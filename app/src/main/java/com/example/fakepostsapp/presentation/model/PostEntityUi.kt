@@ -1,4 +1,4 @@
-package com.example.fakepostsapp.presntation.model
+package com.example.fakepostsapp.presentation.model
 
 data class PostEntityUi(
     val body: String?,

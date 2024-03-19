@@ -1,4 +1,4 @@
-package com.example.fakepostsapp.presntation.view.user_posts.view
+package com.example.fakepostsapp.presentation.view.user_posts.view
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment

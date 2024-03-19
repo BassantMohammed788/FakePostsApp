@@ -2,8 +2,9 @@ package com.example.fakepostsapp.domain.usecase
 
 import com.example.fakepostsapp.domain.entity.PostEntityDomain
 import com.example.fakepostsapp.domain.repository.Repository
+import com.example.fakepostsapp.utilities.Response
 import kotlinx.coroutines.flow.Flow
-import retrofit2.Response
+
 import javax.inject.Inject
 
 class GetUserPostsUseCase @Inject constructor(private val repository: Repository) {

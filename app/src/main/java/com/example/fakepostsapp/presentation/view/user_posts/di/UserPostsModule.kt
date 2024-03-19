@@ -1,4 +1,4 @@
-package com.example.fakepostsapp.presntation.view.user_posts.di
+package com.example.fakepostsapp.presentation.view.user_posts.di
 
 import com.example.fakepostsapp.domain.repository.Repository
 import com.example.fakepostsapp.domain.usecase.GetUserPostsUseCase
