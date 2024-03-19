@@ -1,12 +1,11 @@
-package com.example.fakepostsapp.presentation.view.user_posts.viewmodel
+package com.example.fakepostsapp.presentation.view.post_details.viewmodel
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.fakepostsapp.domain.usecase.GetUserPostsUseCase
+import com.example.fakepostsapp.domain.usecase.GetPostDetailsUseCase
 import com.example.fakepostsapp.presentation.mapper.postDomainToUi
-import com.example.fakepostsapp.presentation.view.user_posts.view.UserPostState
+import com.example.fakepostsapp.presentation.view.post_details.view.PostDetailsState
 import com.example.fakepostsapp.utilities.Response
 import com.example.fakepostsapp.utilities.checkNetworkConnectivity
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,48 +19,47 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
 @HiltViewModel
-class UserPostsViewModel @Inject constructor(
-    private val getUserPostsUseCase: GetUserPostsUseCase
+class PostDetailsViewModel @Inject constructor(
+    private val getPostDetailsUseCase: GetPostDetailsUseCase
 ) :
     ViewModel() {
-    private val mutablePostState: MutableStateFlow<UserPostState.Success> =
-        MutableStateFlow(UserPostState.Success())
-    val postState = mutablePostState.asStateFlow()
-    private val mutableErrorState: MutableSharedFlow<UserPostState.Failure> = MutableSharedFlow()
+    private val mutablePostDetailsState: MutableStateFlow<PostDetailsState.Success> =
+        MutableStateFlow(PostDetailsState.Success())
+    val postDetailsState = mutablePostDetailsState.asStateFlow()
+    private val mutableErrorState: MutableSharedFlow<PostDetailsState.Failure> = MutableSharedFlow()
     val errorState = mutableErrorState.asSharedFlow()
 
-    fun getUSerPosts() {
+    fun getPostDetailsById(id: String) {
 
-        mutablePostState.update {
+
+        mutablePostDetailsState.update {
             it.copy(loading = true)
         }
         viewModelScope.launch {
-            getUserPostsUseCase.getPost().collectLatest { response ->
+            getPostDetailsUseCase.getPostDetailsById(id).collectLatest { response ->
                 when (response) {
                     is Response.Success -> {
                         response.data?.let {
-                            Log.e("UserPostViewModel", "Data: $it")
-                            mutablePostState.update { state ->
+                            mutablePostDetailsState.update { state ->
                                 state.copy(
-                                    postEntityUi = response.data.map {
-                                        it.postDomainToUi()
-                                    }, loading = false
+                                    postEntityUi = response.data.postDomainToUi(),
+                                    loading = false
                                 )
                             }
                         }
+
                     }
 
                     is Response.Failure -> {
                         response.error?.let { errorMessage ->
-                            Log.e("USerPostViewModel", "Data: $errorMessage")
-                            mutableErrorState.emit(UserPostState.Failure(errorMessage))
+                            mutableErrorState.emit(PostDetailsState.Failure(errorMessage))
                         }
-                        mutablePostState.update { it.copy(loading = false) }
+                        mutablePostDetailsState.update { it.copy(loading = false) }
                     }
                 }
             }
         }
     }
 }
+

@@ -15,7 +15,7 @@ import dagger.hilt.android.scopes.ViewModelScoped
 object UserPostsModule {
     @Provides
     @ViewModelScoped
-    fun provideUserPostsUseCase(repository: RepositoryImpl): GetUserPostsUseCase {
+    fun provideUserPostsUseCase(repository: Repository): GetUserPostsUseCase {
         return GetUserPostsUseCase(repository)
     }
 }

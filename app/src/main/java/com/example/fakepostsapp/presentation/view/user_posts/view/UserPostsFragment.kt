@@ -11,9 +11,9 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.fakepostsapp.R
 import com.example.fakepostsapp.databinding.FragmentUserPostsBinding
 import com.example.fakepostsapp.presentation.view.user_posts.viewmodel.UserPostsViewModel
+import com.example.fakepostsapp.utilities.checkNetworkConnectivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -37,8 +37,11 @@ class UserPostsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initViews()
-        initObservers()
-
+        if (checkNetworkConnectivity(requireContext())) {
+            initObservers()
+        }else{
+            Toast.makeText(requireContext(),"No Internet Connection", Toast.LENGTH_SHORT).show()
+        }
     }
     private fun initViews() {
         postsAdapter = UserPostsAdapter {
@@ -79,7 +82,7 @@ class UserPostsFragment : Fragment() {
 
         binding.progressBar.visibility = View.GONE
         binding.rvUserPosts.visibility=View.VISIBLE
-        postsAdapter.submitList(postState.postUiModel)
+        postsAdapter.submitList(postState.postEntityUi)
     }
 
     private fun showErrorState(errorState: UserPostState.Failure) {
