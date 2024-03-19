@@ -1,5 +1,6 @@
 package com.example.fakepostsapp.presentation.view.user_posts.di
 
+import com.example.fakepostsapp.data.repository.RepositoryImpl
 import com.example.fakepostsapp.domain.repository.Repository
 import com.example.fakepostsapp.domain.usecase.GetUserPostsUseCase
 import dagger.Module
@@ -14,7 +15,7 @@ import dagger.hilt.android.scopes.ViewModelScoped
 object UserPostsModule {
     @Provides
     @ViewModelScoped
-    fun provideUserPostsUseCase(repository: Repository): GetUserPostsUseCase {
+    fun provideUserPostsUseCase(repository: RepositoryImpl): GetUserPostsUseCase {
         return GetUserPostsUseCase(repository)
     }
 }

@@ -1,60 +1,90 @@
 package com.example.fakepostsapp.presentation.view.user_posts.view
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.fakepostsapp.R
+import com.example.fakepostsapp.databinding.FragmentUserPostsBinding
+import com.example.fakepostsapp.presentation.view.user_posts.viewmodel.UserPostsViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [UserPostsFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
+@AndroidEntryPoint
 class UserPostsFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private lateinit var binding: FragmentUserPostsBinding
+    private val postViewModel by viewModels<UserPostsViewModel>()
+    private lateinit var postsAdapter: UserPostsAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_user_posts, container, false)
+    ): View {
+        binding = FragmentUserPostsBinding.inflate(layoutInflater, container, false)
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment UserPostsFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            UserPostsFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initViews()
+        initObservers()
+
+    }
+    private fun initViews() {
+        postsAdapter = UserPostsAdapter {
+            val action=UserPostsFragmentDirections.actionUserPostsFragmentToPostDetailsFragment(it)
+            findNavController().navigate(action)
+        }
+        binding.rvUserPosts.apply {
+            adapter = postsAdapter
+            layoutManager = LinearLayoutManager(requireContext())
+        }
+    }
+    private fun initObservers() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            postViewModel.getUSerPosts()
+            postViewModel.postState.collectLatest { userState ->
+                if (userState.loading) {
+                    showLoadingState()
+                } else {
+                    populateUi(userState)
                 }
             }
+            postViewModel.errorState.collect {
+                showErrorState(it)
+            }
+        }
     }
+
+    private fun showLoadingState() {
+        binding.apply {
+            progressBar.visibility = View.VISIBLE
+            rvUserPosts.visibility=View.GONE
+        }
+        Toast.makeText(requireContext(), "loading", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun populateUi(postState: UserPostState.Success) {
+        Log.e("PostsFragment", "PostState: $postState")
+
+        binding.progressBar.visibility = View.GONE
+        binding.rvUserPosts.visibility=View.VISIBLE
+        postsAdapter.submitList(postState.postUiModel)
+    }
+
+    private fun showErrorState(errorState: UserPostState.Failure) {
+        Toast.makeText(requireContext(), errorState.errorMsg, Toast.LENGTH_SHORT).show()
+    }
+
+
 }
